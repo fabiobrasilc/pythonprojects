@@ -1,0 +1,56 @@
+import sqlite3
+
+conn = sqlite3.connect('ln2.db')  # Can use (:memory:) while testing - db file won't be generated
+
+cur = conn.cursor()
+conn.row_factory = sqlite3.Row
+
+# creating tables
+# cur.execute("CREATE TABLE cells (cane text, box text, position text,\
+# cell text, passage text, f_date text, initials text)")
+
+
+def add_cell():  # Add data
+    cane = input('Type cane number (C1-5): ')
+    box = input('Type box number (B1-9): ')
+    position = input('Type position in box (P1-81): ')
+    cell = input('Type cell name: ')
+    passage = input('Type passage (e.g. P2): ')
+    f_date = input('Type date frozen (mm/yy): ')
+    initials = input('Type your initials: ')
+
+    with conn:
+        cur.execute("INSERT INTO cells VALUES (:cane, :box, :position, :cell, :passage, :f_date, :initials)",
+                    {'cane': cane, 'box': box, 'position': position, 'cell': cell, 'passage': passage,
+                     'f_date': f_date, 'initials': initials})
+
+
+def find_cell():  # Search data, current selection allows user to search any word in any column
+    with conn:
+        x = input('Search (type cell name, cane, box, initials, etc): ')
+
+        cur.execute('''SELECT * FROM cells WHERE cell=:cell OR passage=:passage OR f_date=:f_date OR initials=:initials
+                        OR cane=:cane OR box=:box OR position=:position''',
+                    {'cell': x, 'passage': x, 'f_date': x, 'initials': x, 'cane': x, 'box': x, 'position': x})
+
+        row = cur.fetchall()
+        print(row)
+        # for i in range(2):
+        #     for z in range(6):
+        #         print(row[i][z])
+
+        # c.execute("SELECT * FROM cells") to print entire database
+
+
+# Update data
+# cursor.execute("""UPDATE table SET variable = :variable
+#                WHERE variable = :variable AND variable = :variable""", {'variable': variable, 'variable': variable})
+
+# Delete data
+# cursor.execute("DELETE from table WHERE variable = :variable AND variable = :variable",
+#               {'variable': variable, 'variable': variable})
+
+# add_cell()
+find_cell()
+
+conn.close()
